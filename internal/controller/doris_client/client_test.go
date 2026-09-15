@@ -20,6 +20,7 @@ import "testing"
 
 const (
 	testBEPodFQDN = "doris-sample-be-default-0"
+	testBEPodOne  = "doris-sample-be-default-1"
 	testFEPodFQDN = "doris-sample-fe-default-0"
 	testSecretKey = "password"
 	testUserKey   = "username"
@@ -167,12 +168,20 @@ func TestMatchPodToBackend(t *testing.T) {
 			want: true,
 		},
 		{
-			name:    "substring match",
-			podName: "be-default-0",
+			name:    "DNS-qualified host match",
+			podName: testBEPodFQDN,
 			backends: []BackendInfo{
-				{Host: testBEPodFQDN, Port: 9050},
+				{Host: testBEPodFQDN + ".default.svc.cluster.local", Port: 9050},
 			},
 			want: true,
+		},
+		{
+			name:    "ordinal does not match longer ordinal",
+			podName: testBEPodOne,
+			backends: []BackendInfo{
+				{Host: "doris-sample-be-default-10.default.svc.cluster.local", Port: 9050},
+			},
+			want: false,
 		},
 		{
 			name:    "no match",
@@ -190,7 +199,7 @@ func TestMatchPodToBackend(t *testing.T) {
 		},
 		{
 			name:    "matches correct one among multiple",
-			podName: "be-default-1",
+			podName: testBEPodOne,
 			backends: []BackendInfo{
 				{Host: testBEPodFQDN, Port: 9050},
 				{Host: "doris-sample-be-default-1", Port: 9050},
@@ -226,12 +235,20 @@ func TestMatchPodToFrontend(t *testing.T) {
 			want: true,
 		},
 		{
-			name:    "substring match",
-			podName: "fe-default-0",
+			name:    "DNS-qualified host match",
+			podName: testFEPodFQDN,
 			frontends: []FrontendInfo{
-				{Host: testFEPodFQDN},
+				{Host: testFEPodFQDN + ".default.svc.cluster.local"},
 			},
 			want: true,
+		},
+		{
+			name:    "ordinal does not match longer ordinal",
+			podName: "doris-sample-fe-default-1",
+			frontends: []FrontendInfo{
+				{Host: "doris-sample-fe-default-10.default.svc.cluster.local"},
+			},
+			want: false,
 		},
 		{
 			name:      "no match",

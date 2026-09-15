@@ -410,28 +410,30 @@ func ResolvePodHost(podName, namespace, clusterDomain string) string {
 	return fmt.Sprintf("%s.%s.svc.%s", podName, namespace, clusterDomain)
 }
 
-// MatchPodToBackend matches a K8s pod name to a Doris BE node by hostname substring match.
-// Doris registers nodes using their pod hostname, so string matching is sufficient.
+// MatchPodToBackend matches a K8s pod name to a Doris BE node by hostname or DNS name.
 func MatchPodToBackend(podName string, backends []BackendInfo) *BackendInfo {
 	for i := range backends {
 		be := &backends[i]
-		if strings.Contains(be.Host, podName) || be.Host == podName {
+		if matchesPodHost(podName, be.Host) {
 			return be
 		}
 	}
 	return nil
 }
 
-// MatchPodToFrontend matches a K8s pod name to a Doris FE node by hostname substring match.
-// Doris registers nodes using their pod hostname, so string matching is sufficient.
+// MatchPodToFrontend matches a K8s pod name to a Doris FE node by hostname or DNS name.
 func MatchPodToFrontend(podName string, frontends []FrontendInfo) *FrontendInfo {
 	for i := range frontends {
 		fe := &frontends[i]
-		if strings.Contains(fe.Host, podName) || fe.Host == podName {
+		if matchesPodHost(podName, fe.Host) {
 			return fe
 		}
 	}
 	return nil
+}
+
+func matchesPodHost(podName, host string) bool {
+	return host == podName || strings.HasPrefix(host, podName+".")
 }
 
 // parseInt parses a string to int, returning 0 on failure.
