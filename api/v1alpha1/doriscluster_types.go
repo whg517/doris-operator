@@ -176,6 +176,10 @@ type ClusterConfigSpec struct {
 
 // ScaleDownPolicySpec defines the scale-down policy for Doris cluster components.
 type ScaleDownPolicySpec struct {
+	// BackendStrategy selects how the operator removes backend nodes. The
+	// default decommission strategy preserves data but Doris rejects it when the
+	// remaining BE count cannot satisfy a partition's replication allocation.
+	// Use force-drop only for an intentionally destructive capacity reduction.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=decommission;force-drop
 	// +kubebuilder:default=decommission
@@ -185,7 +189,6 @@ type ScaleDownPolicySpec struct {
 	// +kubebuilder:default="2h"
 	// DecommissionTimeout is the maximum duration to wait for BE decommission to complete.
 	// After this timeout, the operator will force-drop the node instead of waiting for data migration.
-	// NOTE: This field is reserved for future implementation; currently decommission will wait indefinitely.
 	DecommissionTimeout *metav1.Duration `json:"decommissionTimeout,omitempty"`
 
 	// +kubebuilder:validation:Optional

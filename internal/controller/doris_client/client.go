@@ -323,14 +323,21 @@ func (c *DorisClient) ShowBrokers(ctx context.Context) ([]BrokerInfo, error) {
 
 // DecommissionBackend safely decommissions a BE node
 func (c *DorisClient) DecommissionBackend(ctx context.Context, host string, port int) error {
-	query := fmt.Sprintf("ALTER SYSTEM DECOMMISSION BACKEND \"%s:%d\"", host, port)
-	return c.exec(ctx, query)
+	return c.exec(ctx, decommissionBackendStatement(host, port))
 }
 
 // DropBackend forcibly removes a BE node
 func (c *DorisClient) DropBackend(ctx context.Context, host string, port int) error {
-	query := fmt.Sprintf("ALTER SYSTEM DROP BACKEND \"%s:%d\"", host, port)
-	return c.exec(ctx, query)
+	return c.exec(ctx, dropBackendStatement(host, port))
+}
+
+func decommissionBackendStatement(host string, port int) string {
+	return fmt.Sprintf("ALTER SYSTEM DECOMMISSION BACKEND \"%s:%d\"", host, port)
+}
+
+func dropBackendStatement(host string, port int) string {
+	// Doris intentionally spells the destructive confirmation keyword DROPP.
+	return fmt.Sprintf("ALTER SYSTEM DROPP BACKEND \"%s:%d\"", host, port)
 }
 
 // DropObserver removes an FE observer node

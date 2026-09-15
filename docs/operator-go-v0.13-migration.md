@@ -153,6 +153,12 @@ the generic role-group apply phase is paused for the whole cluster. Make
 configuration or image rollouts separately from scale-down changes so an
 unrelated rollout is not held behind decommissioning.
 
+`decommission` remains the default BE strategy. Doris rejects it when removing
+a backend would leave fewer available BEs than a partition's replication
+allocation. Before such a reduction, lower the relevant data replication
+allocation through Doris first, or set `backendStrategy: force-drop` only when
+the destructive removal is intentional and its data risk is acceptable.
+
 To remove an FE or BE role group:
 
 1. Keep the cluster running and set that role group's replicas to zero.

@@ -152,6 +152,22 @@ func TestGetClusterAuthCredentials(t *testing.T) {
 	}
 }
 
+func TestBackendManagementStatements(t *testing.T) {
+	const (
+		host = "doris-sample-be-default-1.default.svc.cluster.local"
+		port = 9050
+	)
+
+	if got, want := decommissionBackendStatement(host, port),
+		`ALTER SYSTEM DECOMMISSION BACKEND "doris-sample-be-default-1.default.svc.cluster.local:9050"`; got != want {
+		t.Errorf("decommissionBackendStatement() = %q, want %q", got, want)
+	}
+	if got, want := dropBackendStatement(host, port),
+		`ALTER SYSTEM DROPP BACKEND "doris-sample-be-default-1.default.svc.cluster.local:9050"`; got != want {
+		t.Errorf("dropBackendStatement() = %q, want %q", got, want)
+	}
+}
+
 func TestMatchPodToBackend(t *testing.T) {
 	tests := []struct {
 		name     string
